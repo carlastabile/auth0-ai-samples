@@ -5,7 +5,7 @@ from helpers.retriever import FGARetriever
 from helpers.documents import DocumentWithScore, generate
 
 
-async def main(user: str = "notadmin", query: str = "Show me the forecast for ZEKO?"):
+async def main(user: str = "notadmin",query: str = "Show me the forecast for ZEKO?"):
     # 1. RAG pipeline
     documents = read_documents()
 
@@ -28,9 +28,13 @@ async def main(user: str = "notadmin", query: str = "Show me the forecast for ZE
         "build_query": lambda doc: {
             "user": f"user:{user}",
             "object": f"doc:{doc['id']}",
-            "relation": "viewer",
+            "relation": "owner",
         }
     })
+
+    connected = await retriever.is_connected()
+    if connected:
+        print(f"Connection Successfull!")
 
     # 3. Filter documents based on user permissions
     context = await retriever.retrieve()
@@ -50,3 +54,5 @@ if __name__ == "__main__":
 
     # User1 is part of the financial team and has access to financial reports 
     asyncio.run(main("user1"))
+
+    

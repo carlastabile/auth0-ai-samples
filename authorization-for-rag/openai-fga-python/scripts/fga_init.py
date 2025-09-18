@@ -3,7 +3,10 @@ This initializes the FGA store with the necessary tuple data
 it will use the openfga_sdk and read the configuration from the .config file
 """
 import asyncio
-# import the configuration from the helpers/config.py file
+import sys
+import os
+# Add the parent directory to the path so we can import from helpers
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from helpers.config import config
 from openfga_sdk import ClientConfiguration, OpenFgaClient
 from openfga_sdk.credentials import Credentials, CredentialConfiguration
@@ -13,16 +16,7 @@ from openfga_sdk.client.models import ClientTuple, ClientWriteRequest
 async def fga_setup(config):
     fga_config = ClientConfiguration(
         api_url=config["AUTH0FGA"]["FGA_API_URL"],
-        store_id=config["AUTH0FGA"]["FGA_STORE_ID"],
-        credentials=Credentials(
-            method="client_credentials",
-            configuration=CredentialConfiguration(
-                api_issuer=config["AUTH0FGA"]["FGA_API_TOKEN_ISSUER"],
-                api_audience=config["AUTH0FGA"]["FGA_API_AUDIENCE"],
-                client_id=config["AUTH0FGA"]["FGA_CLIENT_ID"],
-                client_secret=config["AUTH0FGA"]["FGA_CLIENT_SECRET"],
-            )
-        )
+        store_id=config["AUTH0FGA"]["FGA_STORE_ID"]
     ) 
 
     fga_client = OpenFgaClient(fga_config)
