@@ -19,19 +19,10 @@ class FGARetriever:
         self.build_query = args.build_query
         self._fga_configuration = ClientConfiguration(
             api_url=config["AUTH0FGA"]["FGA_API_URL"],
-            store_id=config["AUTH0FGA"]["FGA_STORE_ID"],
-            credentials=Credentials(
-                method="client_credentials",
-                configuration=CredentialConfiguration(
-                    api_issuer=config["AUTH0FGA"]["FGA_API_TOKEN_ISSUER"],
-                    api_audience=config["AUTH0FGA"]["FGA_API_AUDIENCE"],
-                    client_id=config["AUTH0FGA"]["FGA_CLIENT_ID"],
-                    client_secret=config["AUTH0FGA"]["FGA_CLIENT_SECRET"],
-                )
-            )
+            store_id=config["AUTH0FGA"]["FGA_STORE_ID"]
         )
         self.fga_client = OpenFgaClient(self._fga_configuration)
-
+        
     @classmethod
     def create(cls, options: Dict[str, Any]):
         return cls(
@@ -41,12 +32,20 @@ class FGARetriever:
             )
         )
 
+    async def is_connected(self) -> bool:
+        try:
+            store_details = await self.fga_client.get_store()
+            return store_details is not None
+        except Exception as e:
+            print(f"Connection check failed: {e}")
+            return False
+        
     async def check_permissions(self, checks: List[ClientBatchCheckItem]) -> Dict[str, bool]:
         try:
             responses = await self.fga_client.batch_check(
                 ClientBatchCheckRequest(checks=checks)
             )
-
+            
             # Create a dictionary comprehension for document IDs
             results = {doc.document["id"]: False for doc in self.documents}
 
@@ -57,6 +56,7 @@ class FGARetriever:
 
             return results
         except Exception as e:
+            
             print(f"Error checking permissions: {e}")
             return {}
 
