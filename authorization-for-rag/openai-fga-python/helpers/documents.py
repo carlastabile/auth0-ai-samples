@@ -1,4 +1,4 @@
-
+import httpx
 from pathlib import Path
 from dataclasses import dataclass
 
@@ -51,7 +51,10 @@ def read_documents(docs_directory="docs"):
 
 
 async def generate(query: str, context: list[DocumentWithScore]) -> str:
-    openai = OpenAI(api_key=config["OPENAI"]["OPENAI_API_KEY"])
+    openai = OpenAI(
+        api_key=config["OPENAI"]["OPENAI_API_KEY"],
+        http_client=httpx.Client(verify=False),
+    )
     
     context_text = "\n\n".join([d.document["page_content"] for d in context])
     messages = [
@@ -70,5 +73,4 @@ async def generate(query: str, context: list[DocumentWithScore]) -> str:
         model="gpt-4o-mini",
         messages=messages
     )
-    
     return response.choices[0].message.content

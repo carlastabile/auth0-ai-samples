@@ -1,5 +1,6 @@
 import os
 import faiss
+import httpx
 import numpy as np
 
 from helpers.config import config
@@ -9,7 +10,10 @@ from openai import OpenAI
 class LocalVectorStore:
     @staticmethod
     async def from_documents(documents):
-        openai = OpenAI(api_key=config["OPENAI"]["OPENAI_API_KEY"])
+        openai = OpenAI(
+            api_key=config["OPENAI"]["OPENAI_API_KEY"],
+            http_client=httpx.Client(verify=False)
+        )
         index_filename = "faiss_index.index"
         
         if os.path.exists(index_filename):
